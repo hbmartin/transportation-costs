@@ -1,0 +1,17 @@
+{
+  "name": "Transportation Costs",
+  "version": "1.1.1",
+  "description": "Transportation costs, sometimes a lot. See how much in Google Maps.",
+  "icons": {
+    "48": "money_truck.png"
+  },
+  "manifest_version": 2,
+  "permissions": [ "geolocation", "storage", "*://www.google.com/maps/*", "*://*.mapquest.com/*" ],
+  "content_scripts": [
+    {
+      "matches": ["https://www.google.com/maps/preview"],
+      "js": ["main.js"],
+      "css": ["main.css"]
+    }
+  ]
+}
