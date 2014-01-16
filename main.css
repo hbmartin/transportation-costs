@@ -4,7 +4,13 @@
   position: fixed;
   top: 3px;
   color: white;
-  opacity: 0.9;
+  opacity: 0.95;
+  background: white;
+  display: block;
+  color: black;
+  padding: 5px;
+  top: 0;
+  box-shadow: 0px 1px 3px rgba(0,0,0,.5);
 }
 @media (max-width: 1100px) {
   #cost { left: 52%; }

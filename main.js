@@ -60,6 +60,7 @@ var driving_cost = {
     if (( distance=get_distance(cards) )) {
       if (distance != driving_cost.distance) {
         driving_cost.distance = distance;
+        try {
           var addr = document.getElementsByClassName('tactile-searchbox-input')[0].value;
           if (addr) {
             price.update(addr);
@@ -77,11 +78,22 @@ var driving_cost = {
               }
             }
           }
-          driving_cost.render();
+        } catch (e) { console.log(e); }
+        driving_cost.render();
       }
     }
   },
   render: function() {
+		var traffic_cards = document.getElementsByClassName('cards-traffic-title');
+	  if (traffic_cards[0]) {
+				if (traffic_cards[0].innerText.indexOf('park') == -1) {
+					traffic_cards[0].innerHTML += ' (<a id="parkme" target="_blank" href="http://www.parkme.com/map#">parking</a>)';
+				}
+				var searches = document.getElementsByClassName('tactile-searchbox-input');
+				if (searches.length > 1) {
+					document.getElementById('parkme').setAttribute("href", searches[searches.length - 1].value);  
+				}
+	  }
     cost.el.innerHTML = "Cost: <span class='detail'>$" +
                         price.value()  + " &times; " +
                         driving_cost.distance + " mi " +
@@ -100,8 +112,8 @@ var cost = {
     return el;
   }(),
   update: function() {
-    var cards = document.getElementsByClassName('cards-expanded');
-    if (cards[0] && cards[0].innerText.indexOf('Drive') != -1) {
+    var cards = document.getElementsByClassName('cards-directions');
+    if (cards && cards.length) {
       driving_cost.update(cards);
     } else {
       cost.el.style.display = 'none';
