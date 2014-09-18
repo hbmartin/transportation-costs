@@ -6,7 +6,7 @@
   color: white;
   opacity: 0.95;
   background: white;
-  display: block;
+  display: none;
   color: black;
   padding: 5px;
   top: 0;
@@ -20,4 +20,4 @@
   #cost { left: 43%; }
   #cost .detail { display: inline; }
 }
-#mpg { cursor: pointer; }
+#mpg, .pointer { cursor: pointer; }

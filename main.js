@@ -6,6 +6,56 @@ function get_distance(cards) {
   } catch (e) { return false; }
 }
 
+var cycle = {
+  value: function() {
+    return (cycle.distance * ((walk.lbs() * 0.2835) - 0.8853)).toFixed(0);
+  },
+  update: function(cards) {
+    var distance;
+    if (( distance=get_distance(cards) )) {
+      if (distance != cycle.distance) {
+        cycle.distance = distance;
+				cycle.render();
+			}
+		}
+	},
+  render: function() {
+    cost.el.innerHTML = "<span id='calories' class='pointer'>Calories: " + cycle.value() + "</span>";
+    cost.el.style.display = 'block';
+		document.getElementById('calories').addEventListener("click", function() {
+	    walk.lbs( prompt("Enter your weight (lbs)") );
+	    cycle.render();
+		});
+	}
+};
+
+var walk = {
+  value: function() {
+    return (walk.distance * walk.lbs() * 0.53).toFixed(0);
+  },
+	lbs: function(lbs) {
+		if (lbs) { walk.weight = lbs; }
+		return walk.weight || 162;
+	},
+  update: function(cards) {
+    var distance;
+    if (( distance=get_distance(cards) )) {
+      if (distance != walk.distance) {
+        walk.distance = distance;
+				walk.render();
+			}
+		}
+	},
+  render: function() {
+    cost.el.innerHTML = "<span id='calories' class='pointer'>Calories: " + walk.value() + "</span>";
+    cost.el.style.display = 'block';
+		document.getElementById('calories').addEventListener("click", function() {
+	    walk.lbs( prompt("Enter your weight (lbs)") );
+	    walk.render();
+		});
+	}
+};
+
 var mpg = {
   value: function(val) {
     if (typeof val != "undefined") {
@@ -64,36 +114,38 @@ var driving_cost = {
           var addr = document.getElementsByClassName('tactile-searchbox-input')[0].value;
           if (addr) {
             price.update(addr);
+      }
             var details = cards[0].getElementsByClassName('cards-directions-details-right');
+      var a;
             for (var i=0; i<details.length; i++) {
               if (details[i].style.display != 'none') {
                 if (details[i].innerText.indexOf('Parking') == -1) {
-                  var a = document.createElement('a');
+                  a = document.createElement('a');
                   a.style.margin = '0 15px 0 0';
-                  a.href = 'http://www.parkme.com/map#' + addr;
                   a.target = '_blank';
                   a.innerText = 'Find Parking';
                   details[i].insertBefore(a, details[i].children[0]);
                 }
               }
             }
-          }
+      var traffic_cards = document.getElementsByClassName('cards-traffic-title');
+      if (traffic_cards[0]) {
+        if (traffic_cards[0].innerText.indexOf('park') == -1) {
+          traffic_cards[0].innerHTML += ' (<a id="parkme" target="_blank" href="http://www.parkme.com/map#">parking</a>)';
+        }
+        var searches = document.getElementsByClassName('tactile-searchbox-input');
+        if (searches.length > 1) {
+          document.getElementById('parkme').setAttribute("href", "http://www.parkme.com/map#" + searches[searches.length - 1].value);  
+                    a.href = 'http://www.parkme.com/map#' + searches[searches.length - 1].value;
+        }
+      }
+          
         } catch (e) { console.log(e); }
         driving_cost.render();
       }
     }
   },
   render: function() {
-		var traffic_cards = document.getElementsByClassName('cards-traffic-title');
-	  if (traffic_cards[0]) {
-				if (traffic_cards[0].innerText.indexOf('park') == -1) {
-					traffic_cards[0].innerHTML += ' (<a id="parkme" target="_blank" href="http://www.parkme.com/map#">parking</a>)';
-				}
-				var searches = document.getElementsByClassName('tactile-searchbox-input');
-				if (searches.length > 1) {
-					document.getElementById('parkme').setAttribute("href", searches[searches.length - 1].value);  
-				}
-	  }
     cost.el.innerHTML = "Cost: <span class='detail'>$" +
                         price.value()  + " &times; " +
                         driving_cost.distance + " mi " +
@@ -113,9 +165,20 @@ var cost = {
   }(),
   update: function() {
     var cards = document.getElementsByClassName('cards-directions');
-    if (cards && cards.length) {
+  	var cards_text = document.getElementById('cards').innerText;
+    if (!cards || cards.length == 0) {
+    	cost.el.style.display = 'none';
+    }
+    else if (cards_text.indexOf('Show traffic') != -1) {
       driving_cost.update(cards);
-    } else {
+    }
+   	else if (cards_text.indexOf('Show terrain') != -1) {
+   		walk.update(cards);
+   	}
+   	else if (cards_text.indexOf('Show bike') != -1) {
+   		cycle.update(cards);
+   	}
+    else {
       cost.el.style.display = 'none';
     }
   }
