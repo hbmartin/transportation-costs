@@ -1,6 +1,6 @@
 {
   "name": "Transportation Costs",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Transportation costs, sometimes a lot. See how much in Google Maps.",
   "icons": {
     "16": "icons/16.png",
@@ -8,7 +8,7 @@
     "128": "icons/128.png"
   },
   "manifest_version": 2,
-  "permissions": [ "geolocation", "storage", "*://www.google.com/maps/*", "*://*.mapquest.com/*" ],
+  "permissions": [ "geolocation", "storage", "*://www.google.com/maps/*", "*://*.gasbuddy.com/*" ],
   "content_scripts": [
     {
       "matches": ["https://www.google.com/maps/*"],
