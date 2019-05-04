@@ -1,167 +1,175 @@
-function get_distance(cards) {
+function getDistance(cards) {
   try {
-    var re = /(\d+\.?\d*)\s+mi(?!n)/ ;
-    var distance = cards[0].innerText.match(re)[1];
+    const re = /(\d+\.?\d*)\s+mi(?!n)/;
+    const distance = cards[0].innerText.match(re)[1];
     return distance;
   } catch (e) { return false; }
 }
 
-var cycle = {
-  value: function() {
+const cycle = {
+  value() {
     return (cycle.distance * ((walk.lbs() * 0.2835) - 0.8853)).toFixed(0);
   },
-  update: function(cards) {
-    var distance;
-    if (( distance=get_distance(cards) )) {
+  update(cards) {
+    let distance;
+    if ((distance = getDistance(cards))) {
       if (distance != cycle.distance) {
         cycle.distance = distance;
-				cycle.render();
-			}
-		}
-	},
-  render: function() {
-    cost.el.innerHTML = "<span id='calories' class='pointer'>Calories: " + cycle.value() + "</span>";
+        cycle.render();
+      }
+    }
+  },
+  render() {
+    cost.el.innerHTML = `<span id='calories' class='pointer'>Calories: ${cycle.value()}</span>`;
     cost.el.style.display = 'block';
-		document.getElementById('calories').addEventListener("click", function() {
-	    walk.lbs( prompt("Enter your weight (lbs)") );
+    document.getElementById('calories').addEventListener('click', () => {
+	    walk.lbs(prompt('Enter your weight (lbs)'));
 	    cycle.render();
-		});
-	}
+    });
+  },
 };
 
-var walk = {
-  value: function() {
+const walk = {
+  value() {
     return (walk.distance * walk.lbs() * 0.53).toFixed(0);
   },
-	lbs: function(lbs) {
-		if (lbs) { walk.weight = lbs; }
-		return walk.weight || 162;
-	},
-  update: function(cards) {
-    var distance;
-    if (( distance=get_distance(cards) )) {
+  lbs(lbs) {
+    if (lbs) { walk.weight = lbs; }
+    return walk.weight || 162;
+  },
+  update(cards) {
+    let distance;
+    if ((distance = getDistance(cards))) {
       if (distance != walk.distance) {
         walk.distance = distance;
-				walk.render();
-			}
-		}
-	},
-  render: function() {
-    cost.el.innerHTML = "<span id='calories' class='pointer'>Calories: " + walk.value() + "</span>";
-    cost.el.style.display = 'block';
-		document.getElementById('calories').addEventListener("click", function() {
-	    walk.lbs( prompt("Enter your weight (lbs)") );
-	    walk.render();
-		});
-	}
-};
-
-var mpg = {
-  value: function(val) {
-    if (typeof val != "undefined") {
-      val = Number(val);
-      mpg.val = val;
-      localStorage.mpg = val;
-    }
-    return mpg.val || localStorage.mpg || 20;
-  },
-  update: function () {
-    mpg.value( prompt("Enter miles per gallon (mpg)") );
-    driving_cost.render();
-  }
-};
-
-var price = {
-  log: {},
-  value: function(val) {
-    if (typeof val != "undefined") {
-      val = Number(val) || 5;
-      price.val = val;
-      localStorage.price = val;
-    }
-    return price.val || localStorage.price || 5;
-  },
-  update: function(addr) {
-    if (price.log[addr]) {
-      return price.value( price.log[addr] );
-    }
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", "https://www.gasbuddy.com/Home/Search", true);
-	xhr.setRequestHeader('Content-type', 'application/json');
-	
-    xhr.onreadystatechange = function() {
-      if (xhr.readyState == 4) {
-        try {
-          price.value(JSON.parse(xhr.responseText).stations[0].CheapestFuel.CreditPrice.Amount);
-          price.log[addr] = price.value();
-          driving_cost.render();
-        } catch (e) { console.log(e); }
+        walk.render();
       }
-    };
-    xhr.send(JSON.stringify({s:addr}));
-  }
-}
-
-var driving_cost = {
-  value: function(noround) {
-    if (noround) { return price.value() * (1/mpg.value()) * driving_cost.distance; }
-    else { return (price.value() * (1/mpg.value()) * driving_cost.distance).toFixed(2); }
-  },
-  update: function(distance) {
-    if (distance != driving_cost.distance) {
-      driving_cost.distance = distance;
-      try {
-        var addr = document.getElementsByClassName('tactile-searchbox-input')[0].value;
-        if (addr) {
-          price.update(addr);
-        }
-        var details = document.getElementsByClassName('last-waypoint')[0];
-        var destination = details.innerText;
-        var a;
-        if (details.style.display != 'none' && details.innerText.indexOf('Parking') == -1) {
-          a = document.createElement('a');
-          a.id = 'transportation-costs-parking'
-          a.target = '_blank';
-          a.class = 'line';
-          var h2 = document.createElement('h2');
-          h2.innerText = 'Find Parking';
-          a.appendChild(document.createElement('br'));
-          a.appendChild(h2);
-          details.appendChild(a);
-        } else {
-          a = document.getElementById('transportation-costs-parking');
-        }
-        a.href = 'http://www.parkme.com/map#' + destination;
-      } catch (e) { console.log(e); }
-      driving_cost.render();
     }
   },
-  render: function() {
-    cost.el.innerHTML = "Cost: <span class='detail'>$" +
-                        price.value()  + " &times; " +
-                        driving_cost.distance + " mi " +
-                        " / <span id='mpg'>" + mpg.value() + " mpg</span> = </span>$" +
-                        driving_cost.value();
+  render() {
+    cost.el.innerHTML = `<span id='calories' class='pointer'>Calories: ${walk.value()}</span>`;
     cost.el.style.display = 'block';
-    document.getElementById('mpg').addEventListener("click", mpg.update);
-  }
+    document.getElementById('calories').addEventListener('click', () => {
+	    walk.lbs(prompt('Enter your weight (lbs)'));
+	    walk.render();
+    });
+  },
 };
 
-var cost = {
-  el : function() {
-    var el = document.createElement("div");
-    el.id = "cost";
+const mpg = {
+  value(val) {
+    if (!isNaN(val)) {
+      localStorage.mpg = parseFloat(val);
+    }
+    return localStorage.mpg ? parseFloat(localStorage.mpg) : 20;
+  },
+  update() {
+    mpg.value(prompt('Enter miles per gallon (mpg)'));
+    drivingCost.render();
+  },
+};
+
+const xhrGet = (url, callback) => {
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', url, true);
+  xhr.setRequestHeader('content-type', 'application/json');
+  xhr.setRequestHeader('accept', '*/*');
+  xhr.setRequestHeader('accept-language', 'en-US,en;q=0.9');
+  xhr.setRequestHeader('authority', 'www.gasbuddy.com');
+  xhr.setRequestHeader('cache-control', 'no-cache');
+
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState === 4) {
+      try {
+        callback(xhr.responseText);
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.log(e);
+      }
+    }
+  };
+  xhr.send();
+};
+
+const price = {
+  regex: /\$\w?(\d+\.\d+)/g,
+  lastAddress: '',
+  value(val) {
+    if (!isNaN(val)) {
+      localStorage.price = parseFloat(val);
+    }
+    return localStorage.price ? parseFloat(localStorage.price) : 4.00;
+  },
+  update(address) {
+    if (price.lastAddress === address) { return; }
+    const search = encodeURI(address);
+    xhrGet(`https://www.gasbuddy.com/home?search=${search}&fuel=1`, (responseText) => {
+      const matches = responseText.match(price.regex);
+      if (matches) {
+        const newPrice = matches[matches.length - 1];
+        price.value(newPrice.replace('$', ''));
+        drivingCost.render();
+      }
+    });
+  },
+};
+
+const drivingCost = {
+  value(noround) {
+    if (noround) {
+      return price.value() * (1 / mpg.value()) * drivingCost.distance;
+    }
+    return (price.value() * (1 / mpg.value()) * drivingCost.distance).toFixed(2);
+  },
+  update(distance) {
+    if (distance !== drivingCost.distance) {
+      drivingCost.distance = distance;
+      try {
+        const addresses = Array.from(document.getElementsByClassName('tactile-searchbox-input')).map(input => input.value);
+        price.update(addresses[0]);
+        // const details = document.getElementsByClassName('last-waypoint')[0];
+        // const destination = details.innerText;
+        // let a = document.createElement('a');
+        // if (details.style.display !== 'none' && details.innerText.indexOf('Parking') === -1) {
+        //   a.id = 'transportation-costs-parking';
+        //   a.target = '_blank';
+        //   a.class = 'line';
+        //   const h2 = document.createElement('h2');
+        //   h2.innerText = 'Find Parking';
+        //   a.appendChild(document.createElement('br'));
+        //   a.appendChild(h2);
+        //   details.appendChild(a);
+        // } else {
+        //   a = document.getElementById('transportation-costs-parking');
+        // }
+        // a.href = `http://www.parkme.com/map#${destination}`;
+      } catch (e) { console.log(e); }
+      drivingCost.render();
+    }
+  },
+  render() {
+    cost.el.innerHTML = `Cost: <span class='detail'>$${price.value().toFixed(2)} &times; ${drivingCost.distance} mi `
+                        + ` / <span id='tc_mpg'>${mpg.value()} mpg</span> = </span>$${drivingCost.value()}`;
+    cost.el.style.display = 'block';
+    document.getElementById('tc_mpg').addEventListener('click', mpg.update);
+  },
+};
+
+const cost = {
+  el: (() => {
+    const el = document.createElement('div');
+    el.id = 'cost';
     document.body.appendChild(el);
     return el;
-  }(),
-  update: function() {
+  })(),
+  update() {
   	//     var cards = document.getElementsByClassName('travel-mode');
   	// var cards_text = document.getElementById('cards').innerText;
   	//     if (!cards || cards.length == 0) {
   	//     	cost.el.style.display = 'none';
   	//     }
   	//     else if (cards_text.indexOf('Show traffic') != -1) {
-  	//       driving_cost.update(cards);
+  	//       drivingCost.update(cards);
   	//     }
   	//    	else if (cards_text.indexOf('Show terrain') != -1) {
   	//    		walk.update(cards);
@@ -172,36 +180,25 @@ var cost = {
   	//     else {
   	//       cost.el.style.display = 'none';
   	//     }
-	var distance, elements;
-	
-	elements = document.getElementsByClassName('section-trip-summary-subtitle');
-	if (elements && elements.length > 0) {
-		var re=/[\d\.]+/;
-		var matches = re.exec(elements[0].innerText);
-		if (matches && matches.length > 0) {
-			var _d = parseFloat(matches[0]);
-			if (_d && !isNaN(_d)) {
-				distance = _d;
-			}
-		}
-	}
-	
-	if (!distance) {
-		elements = document.getElementsByClassName('section-directions-trip-secondary-text');
-		if (elements && elements.length > 0) {
-			var _d = parseFloat(elements[0].innerText);
-			if (_d && !isNaN(_d)) {
-				distance = _d;
-			}
-		}
-	}
-	
-	if (!distance) {
-		cost.el.style.display = 'none';
-	} else {
-		driving_cost.update(distance);
-	}
-  }
+    let distance;
+
+    const elements = document.getElementsByClassName('section-directions-trip-distance');
+    if (elements.length > 0) {
+      const re = /[\d\.]+/;
+      const matches = re.exec(elements[0].innerText);
+      if (matches && matches.length > 0) {
+        if (!isNaN(matches[0])) {
+          distance = parseFloat(matches[0]);
+        }
+      }
+    }
+
+    if (!distance) {
+      cost.el.style.display = 'none';
+    } else {
+      drivingCost.update(distance);
+    }
+  },
 };
 
 window.setInterval(cost.update, 1000);
